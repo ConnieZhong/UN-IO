@@ -8,30 +8,28 @@
 #include "SearchSession.h"
 #include <glog/logging.h>  
 #include <glog/raw_logging.h> 
-#include "NodeUtil.h"
 #include "TrainPictureProtoMessage.pb.h"
+#include "NodeUtil.h"
 
 using std::cout;
 using std::cin;
 using std::endl;
 using boost::asio::ip::tcp;
 
-
-extern boost::mutex g_match_lock; 
+boost::mutex g_match_lock; 
 extern NodeServer::IOServicePool *g_io_service_pool;
 extern NodeServer::SessionManager* g_session_manager; 
-extern Matcher* g_pic_matcher;
+extern Matcher* g_pic_matcher; 
 namespace NodeServer
 {
 	ClientSession::~ClientSession()
 	{
-        _socket_.close();
 	}
 
     ClientSession::ClientSession( tcp::socket *temp_socket)
         :_socket_(g_io_service_pool->GetIoService())
     {
-      int socketDup = dup(temp_socket->native());  
+        int socketDup = dup(temp_socket->native());  
         _socket_.assign(boost::asio::ip::tcp::v4(), socketDup); 
     }
 	void ClientSession::Start()
@@ -71,12 +69,6 @@ namespace NodeServer
             LOG(INFO)<< "ClientSession :: Header shows : proto length : "
                 <<_header_.length;
             LOG(INFO)<< "ClientSession :: Read proto ing... : " ;
-            if(_header_.length > 500000 )
-            {
-                LOG(ERROR)<< "ClientSession :: Header shows : proto length is too big... : " ;
-			    g_session_manager->Recycle(GetSessionID());
-                return ;
-            }
             _proto_buf_ptr_ = new char[_header_.length ];
             memset(_proto_buf_ptr_ , 0 ,_header_.length ); 
             boost::asio::async_read(_socket_,boost::asio::buffer(_proto_buf_ptr_,(_header_.length)), 
@@ -139,16 +131,11 @@ namespace NodeServer
                     }
                 case 0xa2:
                     {
-                        //g_match_lock.lock();
-                        //g_pic_matcher->train(TRANDIR, FEATUREPATH, INDEXPATH);;
-                        //g_match_lock.unlock();  
                         LOG(INFO)<< "ClientSession :: Proto show it is TRAIN_REQUEST " ;
-                        TrainPictureProtoMessage trainProto;
-                        if(!search_proto_message.ParseFromArray(_proto_buf_ptr_,_header_.length))
+                        TrainPictureProtoMessage train_proto_message;  
+                        if(!train_proto_message.ParseFromArray(_proto_buf_ptr_,_header_.length))
                         {
-                            LOG(ERROR)<< "ClientSession :: parse error ";
-
-                            //g_session_manager->Recycle(GetSessionID());
+                            LOG(ERROR)<< "ClientSession :: train parse error ";
                             return ;
                         }				
                         else
@@ -158,32 +145,25 @@ namespace NodeServer
                                 delete []_proto_buf_ptr_;
                                 _proto_buf_ptr_ = NULL;
                             }
-                            //获取到picture的length				
-                            _pic_len_ = search_proto_message.picture_length();
-                            LOG(INFO)<< "ClientSession :: Proto shows : picture_length : "
-                                << _pic_len_  <<" picture name : "
-                                <<search_proto_message.picture_name();
-                            if(_pic_len_ > 512000 )//设置接收的图片大小不超过500K
-                            {
-                                LOG(ERROR)<< "ClientSession :: too large picture size ";
-                                /*
-                                 *todo 
-                                 *这时返回ROOT错误查询，让ROOT关闭此连接
-                                 *
-                                 * */
-                            }
-                            _content_buf_ptr_ = new char[ _pic_len_  ];
-                            memset(_content_buf_ptr_ , 0 ,_pic_len_ );
-                            _pic_len_ = search_proto_message.picture_length();
-                            boost::asio::async_read(_socket_,
-                                boost::asio::buffer(_content_buf_ptr_,_pic_len_),
-                                boost::bind(&ClientSession::H_New_Search_Session, this,
-                                    boost::asio::placeholders::error , search_proto_message , _content_buf_ptr_));	
-
-
-                    
-                    
-                    break;
+                            g_match_lock.lock();
+                            g_pic_matcher->train(TRANDIR, FEATUREPATH, INDEXPATH);
+                            g_match_lock.unlock();
+                            TrainPictureProtoMessageACK ack;
+                            ack.set_session_id(train_proto_message.session_id());
+                            ack.set_status(1);
+                            string tmp;
+                            ack.SerializeToString(&tmp);
+                            HeadStructMessage header;
+                            header.type = 0xa3;
+                            header.length = tmp.length();
+                            string send((char *)&header , sizeof(HeadStructMessage));
+                            send += tmp;
+                            boost::asio::async_write(_socket_,
+                                boost::asio::buffer(send ,send.length()),
+                                boost::bind(&ClientSession::H_Read_Header, this,
+                                    boost::asio::placeholders::error ));	
+                        }
+                        break; 
                     }
                 default : 
                     LOG(INFO)<< "ClientSession :: header.type not recongnize : " <<_header_.type;
