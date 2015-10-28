@@ -24,29 +24,21 @@ namespace NodeServer
             LOG(ERROR)<<mysql_error(&mysql);
             return;
         }
-        string str = "select name, url, id, video_id, keepword1 from picture;";
+        string str = "select id , name from picture;";
         mysql_query(&mysql, str.c_str());
         result = mysql_store_result(&mysql);
         MYSQL_ROW row = NULL;
         row = mysql_fetch_row(result);
         while(NULL != row)
         {
-            if(row[0] == NULL)
+            if(row[1] == NULL || row[0] == NULL)
             {
                 row = mysql_fetch_row(result);
                 continue;
             }
-            if(row[1] == NULL)
-                _picture_map_[row[0]] = "NOT FOUND";
-            else
-                cout<<"key : "<<row[0]<<" value : \""<<row[2]<<"\" get "<<endl;// for test 
-            _picture_map_[row[0]] = row[1];
-
             struct Picture pic_struct;
-            pic_struct.pic_name_ = row[0] != NULL ? row[0] : "NULL";
-            pic_struct.picture_id_ = atoi(row[2]);
-            pic_struct.vedio_id_ = row[3] != NULL ? atoi(row[3]) : -1;
-            pic_struct.web_url_ = row[4] != NULL ? row[4] : "NULL";
+            pic_struct.pic_name_ = row[1] ;
+            pic_struct.picture_id_ = atoi(row[0]);
             _pic_struct_map_.insert(std::make_pair(row[0],pic_struct));
             row = mysql_fetch_row(result);
         }

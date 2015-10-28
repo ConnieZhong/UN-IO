@@ -28,10 +28,8 @@ namespace NodeServer
 
     struct Picture
     {
-        string pic_name_;
         int picture_id_;
-        int vedio_id_;
-        string web_url_;
+        string pic_name_;
     };
 
     struct MJproduct

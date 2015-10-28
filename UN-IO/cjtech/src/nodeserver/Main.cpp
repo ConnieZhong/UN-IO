@@ -15,6 +15,7 @@ Matcher* g_pic_matcher;
 DBManager* g_db_manager;
 IOServicePool* g_io_service_pool = NULL;
 SessionManager* g_session_manager; 
+boost::mutex g_match_lock; 
 
 int main(int argn, char** argv)
 {
@@ -33,7 +34,9 @@ int main(int argn, char** argv)
     }
     else
     {
+        g_match_lock.lock();
         g_pic_matcher->train(TRANDIR, FEATUREPATH, INDEXPATH);
+        g_match_lock.unlock();
     }
 	
 	g_io_service_pool = new IOServicePool(1);//传入的线程池的大小

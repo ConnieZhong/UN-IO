@@ -8,6 +8,8 @@
 #include "SearchSession.h"
 #include <glog/logging.h>  
 #include <glog/raw_logging.h> 
+#include "NodeUtil.h"
+#include "TrainPictureProtoMessage.pb.h"
 
 using std::cout;
 using std::cin;
@@ -15,8 +17,10 @@ using std::endl;
 using boost::asio::ip::tcp;
 
 
+extern boost::mutex g_match_lock; 
 extern NodeServer::IOServicePool *g_io_service_pool;
 extern NodeServer::SessionManager* g_session_manager; 
+extern Matcher* g_pic_matcher;
 namespace NodeServer
 {
 	ClientSession::~ClientSession()
@@ -132,6 +136,54 @@ namespace NodeServer
                                     boost::asio::placeholders::error , search_proto_message , _content_buf_ptr_));	
                         }
                         break; 
+                    }
+                case 0xa2:
+                    {
+                        //g_match_lock.lock();
+                        //g_pic_matcher->train(TRANDIR, FEATUREPATH, INDEXPATH);;
+                        //g_match_lock.unlock();  
+                        LOG(INFO)<< "ClientSession :: Proto show it is TRAIN_REQUEST " ;
+                        TrainPictureProtoMessage trainProto;
+                        if(!search_proto_message.ParseFromArray(_proto_buf_ptr_,_header_.length))
+                        {
+                            LOG(ERROR)<< "ClientSession :: parse error ";
+
+                            //g_session_manager->Recycle(GetSessionID());
+                            return ;
+                        }				
+                        else
+                        {
+                            if(_proto_buf_ptr_ != NULL)
+                            {
+                                delete []_proto_buf_ptr_;
+                                _proto_buf_ptr_ = NULL;
+                            }
+                            //获取到picture的length				
+                            _pic_len_ = search_proto_message.picture_length();
+                            LOG(INFO)<< "ClientSession :: Proto shows : picture_length : "
+                                << _pic_len_  <<" picture name : "
+                                <<search_proto_message.picture_name();
+                            if(_pic_len_ > 512000 )//设置接收的图片大小不超过500K
+                            {
+                                LOG(ERROR)<< "ClientSession :: too large picture size ";
+                                /*
+                                 *todo 
+                                 *这时返回ROOT错误查询，让ROOT关闭此连接
+                                 *
+                                 * */
+                            }
+                            _content_buf_ptr_ = new char[ _pic_len_  ];
+                            memset(_content_buf_ptr_ , 0 ,_pic_len_ );
+                            _pic_len_ = search_proto_message.picture_length();
+                            boost::asio::async_read(_socket_,
+                                boost::asio::buffer(_content_buf_ptr_,_pic_len_),
+                                boost::bind(&ClientSession::H_New_Search_Session, this,
+                                    boost::asio::placeholders::error , search_proto_message , _content_buf_ptr_));	
+
+
+                    
+                    
+                    break;
                     }
                 default : 
                     LOG(INFO)<< "ClientSession :: header.type not recongnize : " <<_header_.type;
