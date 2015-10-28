@@ -29,13 +29,14 @@ void protobuf_AssignDesc_SearchResultMessage_2eproto() {
       "SearchResultMessage.proto");
   GOOGLE_CHECK(file != NULL);
   SearchResultMessage_descriptor_ = file->message_type(0);
-  static const int SearchResultMessage_offsets_[6] = {
+  static const int SearchResultMessage_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, picture_name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, result_length_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, task_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, mj_id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, trackerurl_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, status_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SearchResultMessage, retrain_),
   };
   SearchResultMessage_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -78,11 +79,11 @@ void protobuf_AddDesc_SearchResultMessage_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\031SearchResultMessage.proto\"\206\001\n\023SearchRe"
+    "\n\031SearchResultMessage.proto\"\227\001\n\023SearchRe"
     "sultMessage\022\024\n\014picture_name\030\001 \002(\t\022\025\n\rres"
     "ult_length\030\002 \002(\r\022\017\n\007task_id\030\003 \002(\r\022\r\n\005mj_"
     "id\030\004 \002(\t\022\022\n\ntrackerUrl\030\005 \002(\t\022\016\n\006status\030\006"
-    " \002(\r", 164);
+    " \002(\r\022\017\n\007retrain\030\007 \002(\005", 181);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "SearchResultMessage.proto", &protobuf_RegisterTypes);
   SearchResultMessage::default_instance_ = new SearchResultMessage();
@@ -107,6 +108,7 @@ const int SearchResultMessage::kTaskIdFieldNumber;
 const int SearchResultMessage::kMjIdFieldNumber;
 const int SearchResultMessage::kTrackerUrlFieldNumber;
 const int SearchResultMessage::kStatusFieldNumber;
+const int SearchResultMessage::kRetrainFieldNumber;
 #endif  // !_MSC_VER
 
 SearchResultMessage::SearchResultMessage()
@@ -131,6 +133,7 @@ void SearchResultMessage::SharedCtor() {
   mj_id_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   trackerurl_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   status_ = 0u;
+  retrain_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -192,6 +195,7 @@ void SearchResultMessage::Clear() {
       }
     }
     status_ = 0u;
+    retrain_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -297,6 +301,22 @@ bool SearchResultMessage::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(56)) goto parse_retrain;
+        break;
+      }
+      
+      // required int32 retrain = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_retrain:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &retrain_)));
+          set_has_retrain();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -361,6 +381,11 @@ void SearchResultMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->status(), output);
   }
   
+  // required int32 retrain = 7;
+  if (has_retrain()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->retrain(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -412,6 +437,11 @@ void SearchResultMessage::SerializeWithCachedSizes(
   // required uint32 status = 6;
   if (has_status()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->status(), target);
+  }
+  
+  // required int32 retrain = 7;
+  if (has_retrain()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->retrain(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -467,6 +497,13 @@ int SearchResultMessage::ByteSize() const {
           this->status());
     }
     
+    // required int32 retrain = 7;
+    if (has_retrain()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->retrain());
+    }
+    
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -512,6 +549,9 @@ void SearchResultMessage::MergeFrom(const SearchResultMessage& from) {
     if (from.has_status()) {
       set_status(from.status());
     }
+    if (from.has_retrain()) {
+      set_retrain(from.retrain());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -529,7 +569,7 @@ void SearchResultMessage::CopyFrom(const SearchResultMessage& from) {
 }
 
 bool SearchResultMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000003f) != 0x0000003f) return false;
+  if ((_has_bits_[0] & 0x0000007f) != 0x0000007f) return false;
   
   return true;
 }
@@ -542,6 +582,7 @@ void SearchResultMessage::Swap(SearchResultMessage* other) {
     std::swap(mj_id_, other->mj_id_);
     std::swap(trackerurl_, other->trackerurl_);
     std::swap(status_, other->status_);
+    std::swap(retrain_, other->retrain_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

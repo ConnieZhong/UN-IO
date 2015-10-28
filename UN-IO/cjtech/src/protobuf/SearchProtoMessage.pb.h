@@ -127,6 +127,13 @@ class SearchProtoMessage : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 task_id() const;
   inline void set_task_id(::google::protobuf::uint32 value);
   
+  // required int32 retrain = 6;
+  inline bool has_retrain() const;
+  inline void clear_retrain();
+  static const int kRetrainFieldNumber = 6;
+  inline ::google::protobuf::int32 retrain() const;
+  inline void set_retrain(::google::protobuf::int32 value);
+  
   // @@protoc_insertion_point(class_scope:SearchProtoMessage)
  private:
   inline void set_has_picture_length();
@@ -139,6 +146,8 @@ class SearchProtoMessage : public ::google::protobuf::Message {
   inline void clear_has_end_time();
   inline void set_has_task_id();
   inline void clear_has_task_id();
+  inline void set_has_retrain();
+  inline void clear_has_retrain();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
@@ -147,9 +156,10 @@ class SearchProtoMessage : public ::google::protobuf::Message {
   float start_time_;
   float end_time_;
   ::google::protobuf::uint32 task_id_;
+  ::google::protobuf::int32 retrain_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
   
   friend void  protobuf_AddDesc_SearchProtoMessage_2eproto();
   friend void protobuf_AssignDesc_SearchProtoMessage_2eproto();
@@ -309,6 +319,28 @@ inline ::google::protobuf::uint32 SearchProtoMessage::task_id() const {
 inline void SearchProtoMessage::set_task_id(::google::protobuf::uint32 value) {
   set_has_task_id();
   task_id_ = value;
+}
+
+// required int32 retrain = 6;
+inline bool SearchProtoMessage::has_retrain() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SearchProtoMessage::set_has_retrain() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SearchProtoMessage::clear_has_retrain() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SearchProtoMessage::clear_retrain() {
+  retrain_ = 0;
+  clear_has_retrain();
+}
+inline ::google::protobuf::int32 SearchProtoMessage::retrain() const {
+  return retrain_;
+}
+inline void SearchProtoMessage::set_retrain(::google::protobuf::int32 value) {
+  set_has_retrain();
+  retrain_ = value;
 }
 
 

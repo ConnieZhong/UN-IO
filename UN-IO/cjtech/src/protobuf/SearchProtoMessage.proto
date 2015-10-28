@@ -5,6 +5,7 @@ message SearchProtoMessage
     required float start_time = 3;
     required float end_time = 4;
     required uint32 task_id = 5;
+    required int32 retrain = 6;
 }
 
 

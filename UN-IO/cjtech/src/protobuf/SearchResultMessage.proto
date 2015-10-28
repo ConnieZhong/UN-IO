@@ -6,5 +6,5 @@ message SearchResultMessage
 	required string mj_id = 4;
 	required string trackerUrl = 5;
 	required uint32 status = 6;
-    
+    required int32 retrain = 7;
 }
